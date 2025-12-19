@@ -10,6 +10,12 @@ M.defaults = {
 	enabled = true,
 	set_foldmethod = true,
 	custom_foldtext = true, -- Use custom fold text display
+	foldtext_config = {
+		fold_icon = "󰅂", -- Icon shown before folded content
+		line_icon = "󰦨", -- Icon shown before line count
+		padding_char = "·", -- Character used for padding
+		use_nerd_font = vim.g.have_nerd_font, -- Auto-detect nerd font
+	},
 	exclude_filetypes = { "help", "alpha", "dashboard", "NvimTree", "neo-tree", "Trouble" },
 	foldable_nodes = {
 		lua = {

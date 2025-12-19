@@ -168,13 +168,17 @@ vim.keymap.set('n', 'zl', require('piega').fold_level)
 
 ### Custom Fold Display
 
-By default, Piega uses a custom fold text that shows:
+By default, Piega uses a beautiful custom fold text that shows:
+- A fold icon (󰅂)
 - The content of the first line
-- The number of folded lines
+- Dotted padding for visual alignment
+- A line count with icon (󰦨 15 lines)
+- Adaptive colors that match your colorscheme
+- Italic styling for subtle elegance
 
 Example of a folded block:
 ```
-  icons = vim.g.have_nerd_font and {} or {  15 lines
+  󰅂 icons = vim.g.have_nerd_font and {} or { ··················· 󰦨 15 lines
 ```
 
 To disable custom fold text and use Neovim's default:
@@ -182,6 +186,19 @@ To disable custom fold text and use Neovim's default:
 ```lua
 require('piega').setup({
   custom_foldtext = false,
+})
+```
+
+To customize the fold display:
+
+```lua
+require('piega').setup({
+  foldtext_config = {
+    fold_icon = "▸",      -- Icon before folded content
+    line_icon = "→",      -- Icon before line count
+    padding_char = "·",   -- Character for padding
+    use_nerd_font = true, -- Use Nerd Font icons
+  },
 })
 ```
 
