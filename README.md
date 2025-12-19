@@ -94,6 +94,7 @@ require('piega').setup({
   },
   enabled = true,                -- Enable/disable plugin globally
   set_foldmethod = true,         -- Automatically set foldmethod to manual
+  custom_foldtext = true,        -- Use custom fold text (shows line count)
   exclude_filetypes = {          -- Filetypes to exclude
     "help",
     "alpha",
@@ -163,6 +164,25 @@ require('piega').setup({
 vim.keymap.set('n', 'zf', require('piega').fold_scope)
 vim.keymap.set('n', 'zu', require('piega').unfold_all)
 vim.keymap.set('n', 'zl', require('piega').fold_level)
+```
+
+### Custom Fold Display
+
+By default, Piega uses a custom fold text that shows:
+- The content of the first line
+- The number of folded lines
+
+Example of a folded block:
+```
+  icons = vim.g.have_nerd_font and {} or {  15 lines
+```
+
+To disable custom fold text and use Neovim's default:
+
+```lua
+require('piega').setup({
+  custom_foldtext = false,
+})
 ```
 
 ## Usage

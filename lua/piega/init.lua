@@ -34,17 +34,24 @@ function M.setup(opts)
   local keymaps = require("piega.keymaps")
   keymaps.setup_keymaps(config.get())
 
-  -- Set foldmethod to manual if configured
-  if config.get().set_foldmethod then
-    vim.api.nvim_create_autocmd("FileType", {
-      pattern = "*",
-      callback = function()
-        if config.is_enabled() then
+  -- Set foldmethod and foldtext if configured
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "*",
+    callback = function()
+      if config.is_enabled() then
+        -- Set foldmethod to manual if configured
+        if config.get().set_foldmethod then
           vim.opt_local.foldmethod = "manual"
         end
-      end,
-    })
-  end
+
+        -- Setup custom foldtext if configured
+        if config.get().custom_foldtext then
+          local foldtext = require("piega.foldtext")
+          foldtext.setup_buffer()
+        end
+      end
+    end,
+  })
 
   initialized = true
 end

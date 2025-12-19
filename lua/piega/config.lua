@@ -9,6 +9,7 @@ M.defaults = {
 	},
 	enabled = true,
 	set_foldmethod = true,
+	custom_foldtext = true, -- Use custom fold text display
 	exclude_filetypes = { "help", "alpha", "dashboard", "NvimTree", "neo-tree", "Trouble" },
 	foldable_nodes = {
 		lua = {

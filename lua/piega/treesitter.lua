@@ -92,50 +92,71 @@ function M.get_scope_node(node)
     return nil
   end
 
-  -- Start with current node
-  local current = node
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor_line = cursor[1] - 1  -- Convert to 0-indexed
+  local cursor_col = cursor[2]
 
-  -- Walk up until we find a foldable node
+  -- FIRST: Search for all foldable nodes on the current line
+  local bufnr = vim.api.nvim_get_current_buf()
+  local parser = parsers.get_parser(bufnr)
+
+  if parser then
+    local root = ts_utils.get_root_for_position(cursor_line, 0, parser)
+    if root then
+      local nodes_on_line = {}
+
+      -- Recursively find all foldable nodes that start on the current line
+      local function find_nodes_on_line(n)
+        if not n then return end
+
+        local start_row, start_col, end_row, _ = n:range()
+
+        -- If node starts on cursor line and is foldable, add it
+        if start_row == cursor_line and M.is_foldable_node(n) then
+          -- Also verify it contains content beyond the current line (multi-line)
+          if end_row > start_row then
+            table.insert(nodes_on_line, {
+              node = n,
+              start_col = start_col,
+            })
+          end
+        end
+
+        -- Continue searching children
+        for child in n:iter_children() do
+          find_nodes_on_line(child)
+        end
+      end
+
+      find_nodes_on_line(root)
+
+      -- If we found foldable nodes on this line, pick the best one
+      if #nodes_on_line > 0 then
+        -- Sort by column position
+        table.sort(nodes_on_line, function(a, b)
+          return a.start_col < b.start_col
+        end)
+
+        -- Find the first node that starts at or after cursor
+        for _, info in ipairs(nodes_on_line) do
+          if info.start_col >= cursor_col then
+            return info.node
+          end
+        end
+
+        -- If no node starts at or after cursor, take the last one (rightmost)
+        return nodes_on_line[#nodes_on_line].node
+      end
+    end
+  end
+
+  -- SECOND: No foldable nodes on current line, walk up from cursor to find containing scope
+  local current = node
   while current do
     if M.is_foldable_node(current) then
       return current
     end
     current = current:parent()
-  end
-
-  -- If no foldable parent found, check for nodes that start on the current line
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_line = cursor[1] - 1  -- Convert to 0-indexed
-
-  -- Get root node and search for foldable nodes on this line
-  local bufnr = vim.api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr)
-  if parser then
-    local root = ts_utils.get_root_for_position(cursor_line, 0, parser)
-    if root then
-      -- Find all nodes that start on the current line
-      local function find_foldable_on_line(n)
-        if not n then return nil end
-
-        local start_row, _, _, _ = n:range()
-        if start_row == cursor_line and M.is_foldable_node(n) then
-          return n
-        end
-
-        -- Check children
-        for child in n:iter_children() do
-          local found = find_foldable_on_line(child)
-          if found then return found end
-        end
-
-        return nil
-      end
-
-      local found_node = find_foldable_on_line(root)
-      if found_node then
-        return found_node
-      end
-    end
   end
 
   return nil
