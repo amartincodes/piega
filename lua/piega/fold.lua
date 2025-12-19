@@ -26,10 +26,10 @@ function M.fold_range(start_line, end_line)
   local bufnr = vim.api.nvim_get_current_buf()
 
   -- Save current fold method
-  local current_foldmethod = vim.api.nvim_buf_get_option(bufnr, "foldmethod")
+  local current_foldmethod = vim.wo.foldmethod
 
   -- Temporarily set to manual for creating folds
-  vim.api.nvim_buf_set_option(bufnr, "foldmethod", "manual")
+  vim.wo.foldmethod = "manual"
 
   -- Create the fold
   local success = pcall(function()
@@ -40,7 +40,7 @@ function M.fold_range(start_line, end_line)
 
   -- Restore original fold method if set_foldmethod is false
   if not config.get().set_foldmethod then
-    vim.api.nvim_buf_set_option(bufnr, "foldmethod", current_foldmethod)
+    vim.wo.foldmethod = current_foldmethod
   end
 
   return success
@@ -177,22 +177,20 @@ function M.fold_same_level()
     return
   end
 
-  -- Get all sibling nodes
+  -- Fold the current scope node first
+  local current_start, current_end = ts.get_node_range(scope_node)
+  local fold_count = 0
+
+  if current_start and current_end then
+    local success = M.fold_range(current_start, current_end)
+    if success then
+      fold_count = 1
+    end
+  end
+
+  -- Get all sibling nodes and fold them
   local siblings = ts.get_sibling_nodes(scope_node)
 
-  if #siblings == 0 then
-    notify_warn("No sibling nodes found at the same level")
-    return
-  end
-
-  -- Also fold the current scope node
-  local current_start, current_end = ts.get_node_range(scope_node)
-  if current_start and current_end then
-    M.fold_range(current_start, current_end)
-  end
-
-  -- Fold each sibling
-  local fold_count = 1 -- Count current node
   for _, sibling in ipairs(siblings) do
     local start_line, end_line = ts.get_node_range(sibling)
     if start_line and end_line then
@@ -203,7 +201,11 @@ function M.fold_same_level()
     end
   end
 
-  notify_info("Folded " .. fold_count .. " node(s) at the same level")
+  if fold_count > 0 then
+    notify_info("Folded " .. fold_count .. " node(s) at the same level")
+  else
+    notify_warn("Could not fold any nodes at the same level")
+  end
 end
 
 return M

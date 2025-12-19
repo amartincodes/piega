@@ -265,9 +265,42 @@ For example: `:TSInstall python`, `:TSInstall lua`, etc.
 
 Your cursor might be in a location without a recognizable scope. Try moving the cursor inside a function, class, or other code block. You can also extend the `foldable_nodes` configuration for your language.
 
+## Development & Testing
+
+Piega includes a comprehensive test suite using [plenary.nvim](https://github.com/nvim-lua/plenary.nvim).
+
+### Running Tests
+
+Make sure you have plenary.nvim installed, then run:
+
+```bash
+make test
+```
+
+Or run a specific test file:
+
+```bash
+make test-file FILE=tests/config_spec.lua
+```
+
+### Test Coverage
+
+The test suite covers:
+- Configuration management and merging
+- Treesitter node detection and range handling
+- Folding operations and buffer management
+- All supported languages including JSON
+
+See [tests/README.md](tests/README.md) for more details.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+When contributing:
+1. Write tests for new features
+2. Ensure all tests pass with `make test`
+3. Follow the existing code style
 
 ## License
 

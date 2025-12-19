@@ -103,9 +103,39 @@ function M.get_scope_node(node)
     current = current:parent()
   end
 
-  -- If no foldable parent found, return the original node if it's foldable
-  if M.is_foldable_node(node) then
-    return node
+  -- If no foldable parent found, check for nodes that start on the current line
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor_line = cursor[1] - 1  -- Convert to 0-indexed
+
+  -- Get root node and search for foldable nodes on this line
+  local bufnr = vim.api.nvim_get_current_buf()
+  local parser = parsers.get_parser(bufnr)
+  if parser then
+    local root = ts_utils.get_root_for_position(cursor_line, 0, parser)
+    if root then
+      -- Find all nodes that start on the current line
+      local function find_foldable_on_line(n)
+        if not n then return nil end
+
+        local start_row, _, _, _ = n:range()
+        if start_row == cursor_line and M.is_foldable_node(n) then
+          return n
+        end
+
+        -- Check children
+        for child in n:iter_children() do
+          local found = find_foldable_on_line(child)
+          if found then return found end
+        end
+
+        return nil
+      end
+
+      local found_node = find_foldable_on_line(root)
+      if found_node then
+        return found_node
+      end
+    end
   end
 
   return nil

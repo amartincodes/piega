@@ -1,0 +1,63 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        neovim-version: ['stable', 'nightly']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim-version }}
+
+      - name: Install plenary.nvim
+        run: |
+          mkdir -p ~/.local/share/nvim/site/pack/vendor/start
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim \
+            ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+
+      - name: Install nvim-treesitter
+        run: |
+          git clone --depth 1 https://github.com/nvim-treesitter/nvim-treesitter \
+            ~/.local/share/nvim/site/pack/vendor/start/nvim-treesitter
+
+      - name: Run tests
+        run: |
+          nvim --version
+          make test
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Lua
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 luarocks
+
+      - name: Install luacheck
+        run: |
+          sudo luarocks install luacheck
+
+      - name: Run luacheck
+        run: |
+          luacheck lua/ --globals vim
+        continue-on-error: true
