@@ -80,6 +80,8 @@ Default keybindings:
 - `<leader>zf` - Fold/unfold the scope of the current line
 - `<leader>zu` - Unfold everything in the buffer
 - `<leader>zl` - Fold all nodes at the same level as the current line
+- `<leader>zn` - Jump to next fold
+- `<leader>zp` - Jump to previous fold
 
 ## Configuration
 
@@ -91,6 +93,8 @@ require('piega').setup({
     fold_scope = "<leader>zf",  -- Fold/unfold current scope
     unfold_all = "<leader>zu",   -- Unfold everything
     fold_level = "<leader>zl",   -- Fold all at same level
+    next_fold = "<leader>zn",   -- Jump to next fold
+    prev_fold = "<leader>zp",   -- Jump to previous fold
   },
   enabled = true,                -- Enable/disable plugin globally
   set_foldmethod = true,         -- Automatically set foldmethod to manual
@@ -145,6 +149,8 @@ require('piega').setup({
     fold_scope = "zf",
     unfold_all = "zu",
     fold_level = "zl",
+    next_fold = "<C-j>",  -- Or any key you prefer
+    prev_fold = "<C-k>",  -- Or any key you prefer
   },
 })
 ```
@@ -157,6 +163,8 @@ require('piega').setup({
     fold_scope = false,
     unfold_all = false,
     fold_level = false,
+    next_fold = false,
+    prev_fold = false,
   },
 })
 
@@ -164,6 +172,8 @@ require('piega').setup({
 vim.keymap.set('n', 'zf', require('piega').fold_scope)
 vim.keymap.set('n', 'zu', require('piega').unfold_all)
 vim.keymap.set('n', 'zl', require('piega').fold_level)
+vim.keymap.set('n', 'zn', require('piega').next_fold)
+vim.keymap.set('n', 'zp', require('piega').prev_fold)
 ```
 
 ### Custom Fold Display
@@ -247,6 +257,21 @@ class Example:
 
 After pressing `<leader>zl`, all three methods will be folded.
 
+### Navigate Between Folds
+
+Quickly jump between folded sections in your buffer:
+
+- Press `<leader>zn` to jump to the **next** fold (closed fold)
+- Press `<leader>zp` to jump to the **previous** fold (closed fold)
+
+These keybindings:
+- Navigate only to closed/collapsed folds
+- Work correctly even when your cursor is on a folded line
+- Wrap around when reaching the end/beginning of the file
+- Show notifications when wrapping or if no folds are found
+
+Perfect for quickly navigating through your folded code!
+
 ## Commands
 
 Piega also provides Vim commands:
@@ -263,6 +288,8 @@ You can also use the Lua API directly:
 require('piega').fold_scope()   -- Fold/unfold current scope
 require('piega').unfold_all()   -- Unfold all in buffer
 require('piega').fold_level()   -- Fold all at same level
+require('piega').next_fold()    -- Jump to next fold
+require('piega').prev_fold()    -- Jump to previous fold
 ```
 
 ## Supported Languages

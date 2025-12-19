@@ -86,6 +86,26 @@ function M.fold_level()
   require("piega.fold").fold_same_level()
 end
 
+-- Public API: Jump to next fold
+function M.next_fold()
+  if not initialized then
+    notify_error("Plugin not initialized. Call require('piega').setup() first")
+    return
+  end
+
+  require("piega.navigation").next_fold()
+end
+
+-- Public API: Jump to previous fold
+function M.prev_fold()
+  if not initialized then
+    notify_error("Plugin not initialized. Call require('piega').setup() first")
+    return
+  end
+
+  require("piega.navigation").prev_fold()
+end
+
 -- Public API: Check if plugin is initialized
 function M.is_initialized()
   return initialized

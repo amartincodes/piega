@@ -6,6 +6,8 @@ M.defaults = {
 		fold_scope = "<leader>zf",
 		unfold_all = "<leader>zu",
 		fold_level = "<leader>zl",
+		next_fold = "<leader>zn",
+		prev_fold = "<leader>zp",
 	},
 	enabled = true,
 	set_foldmethod = true,

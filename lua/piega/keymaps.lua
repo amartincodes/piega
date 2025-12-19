@@ -43,6 +43,28 @@ function M.setup_keymaps(cfg)
     })
     table.insert(M._keymaps, { mode = "n", lhs = keymaps.fold_level })
   end
+
+  -- Jump to next fold
+  if keymaps.next_fold then
+    vim.keymap.set("n", keymaps.next_fold, function()
+      require("piega.navigation").next_fold()
+    end, {
+      desc = "Piega: Jump to next fold",
+      silent = true,
+    })
+    table.insert(M._keymaps, { mode = "n", lhs = keymaps.next_fold })
+  end
+
+  -- Jump to previous fold
+  if keymaps.prev_fold then
+    vim.keymap.set("n", keymaps.prev_fold, function()
+      require("piega.navigation").prev_fold()
+    end, {
+      desc = "Piega: Jump to previous fold",
+      silent = true,
+    })
+    table.insert(M._keymaps, { mode = "n", lhs = keymaps.prev_fold })
+  end
 end
 
 -- Clear all plugin keymaps
