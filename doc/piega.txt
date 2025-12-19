@@ -1,0 +1,301 @@
+*piega.txt*  Intelligent code folding for Neovim using Treesitter
+
+                                                                         *piega*
+==============================================================================
+CONTENTS                                                       *piega-contents*
+
+    1. Introduction ................................ |piega-introduction|
+    2. Requirements ................................ |piega-requirements|
+    3. Installation ................................ |piega-installation|
+    4. Quick Start ................................. |piega-quickstart|
+    5. Configuration ............................... |piega-configuration|
+    6. Commands .................................... |piega-commands|
+    7. API ......................................... |piega-api|
+    8. Features .................................... |piega-features|
+    9. Troubleshooting ............................. |piega-troubleshooting|
+    10. License .................................... |piega-license|
+
+==============================================================================
+1. INTRODUCTION                                            *piega-introduction*
+
+Piega (Italian for "fold") is a Neovim plugin that provides intelligent,
+scope-aware code folding using Treesitter. It makes it easy to fold and
+unfold code blocks with intuitive keybindings.
+
+Features:
+  - Fold/unfold the current scope intelligently
+  - Unfold everything in the current buffer
+  - Fold all nodes at the same level (e.g., all methods in a class)
+  - Treesitter-based scope detection
+  - Works with all major plugin managers
+
+==============================================================================
+2. REQUIREMENTS                                            *piega-requirements*
+
+  - Neovim >= 0.7.0
+  - nvim-treesitter plugin
+  - Treesitter parsers for your target languages
+
+==============================================================================
+3. INSTALLATION                                            *piega-installation*
+
+Using lazy.nvim: >lua
+    {
+      'amartincodes/piega',
+      dependencies = { 'nvim-treesitter/nvim-treesitter' },
+      config = function()
+        require('piega').setup({
+          -- your configuration here
+        })
+      end,
+    }
+<
+
+Using packer.nvim: >lua
+    use {
+      'amartincodes/piega',
+      requires = { 'nvim-treesitter/nvim-treesitter' },
+      config = function()
+        require('piega').setup()
+      end,
+    }
+<
+
+Using vim-plug: >vim
+    Plug 'nvim-treesitter/nvim-treesitter'
+    Plug 'amartincodes/piega'
+
+    " In your init.vim or after plug#end()
+    lua << EOF
+    require('piega').setup()
+    EOF
+<
+
+Using pathogen: >bash
+    cd ~/.vim/bundle
+    git clone https://github.com/amartincodes/piega.git
+<
+
+==============================================================================
+4. QUICK START                                              *piega-quickstart*
+
+After installation, add to your config: >lua
+    require('piega').setup()
+<
+
+Default keybindings:
+  <leader>zf  - Fold/unfold the scope of the current line
+  <leader>zu  - Unfold everything in the buffer
+  <leader>zl  - Fold all nodes at the same level as the current line
+
+==============================================================================
+5. CONFIGURATION                                          *piega-configuration*
+
+Default configuration: >lua
+    require('piega').setup({
+      keymaps = {
+        fold_scope = "<leader>zf",  -- Fold/unfold current scope
+        unfold_all = "<leader>zu",   -- Unfold everything
+        fold_level = "<leader>zl",   -- Fold all at same level
+      },
+      enabled = true,
+      set_foldmethod = true,  -- Automatically set foldmethod to manual
+      exclude_filetypes = {   -- Filetypes to exclude
+        "help",
+        "alpha",
+        "dashboard",
+        "NvimTree",
+        "neo-tree",
+        "Trouble",
+      },
+      foldable_nodes = {  -- Node types to consider foldable
+        lua = {
+          "function_declaration",
+          "function_definition",
+          "if_statement",
+          "for_statement",
+          "while_statement",
+          "table_constructor",
+        },
+        python = {
+          "function_definition",
+          "class_definition",
+          "if_statement",
+          "for_statement",
+          "while_statement",
+          "with_statement",
+        },
+        javascript = {
+          "function_declaration",
+          "function_expression",
+          "arrow_function",
+          "class_declaration",
+          "method_definition",
+          "if_statement",
+          "for_statement",
+          "while_statement",
+        },
+        -- See full list in lua/piega/config.lua
+      },
+    })
+<
+
+Configuration Options:                                    *piega-config-options*
+
+keymaps~
+    Table containing keymap definitions. Set to `false` to disable a keymap.
+
+    Default: >lua
+        {
+          fold_scope = "<leader>zf",
+          unfold_all = "<leader>zu",
+          fold_level = "<leader>zl",
+        }
+<
+
+enabled~
+    Enable or disable the plugin globally.
+
+    Default: `true`
+
+set_foldmethod~
+    Automatically set foldmethod to "manual" for better compatibility.
+
+    Default: `true`
+
+exclude_filetypes~
+    List of filetypes where the plugin should be disabled.
+
+    Default: `{ "help", "alpha", "dashboard", "NvimTree", "neo-tree", "Trouble" }`
+
+foldable_nodes~
+    Table mapping filetypes to lists of Treesitter node types that should
+    be considered foldable scopes.
+
+    You can extend this for custom languages: >lua
+        require('piega').setup({
+          foldable_nodes = {
+            mylang = { "custom_node", "another_node" },
+          },
+        })
+<
+
+==============================================================================
+6. COMMANDS                                                    *piega-commands*
+
+                                                            *:PiegaFoldScope*
+:PiegaFoldScope
+    Fold or unfold the scope of the current line. The scope is determined
+    by walking up the Treesitter AST to find the nearest foldable parent
+    node (e.g., function, class, block).
+
+                                                            *:PiegaUnfoldAll*
+:PiegaUnfoldAll
+    Unfold all folds in the current buffer.
+
+                                                            *:PiegaFoldLevel*
+:PiegaFoldLevel
+    Fold all nodes at the same level as the current line. For example, if
+    your cursor is on a method declaration, this will fold all methods in
+    the same class.
+
+==============================================================================
+7. API                                                              *piega-api*
+
+require('piega').setup({opts})                             *piega.setup()*
+    Initialize the plugin with the given configuration.
+
+    Parameters: ~
+        {opts}  (table|nil)  Configuration options
+
+require('piega').fold_scope()                              *piega.fold_scope()*
+    Fold or unfold the scope of the current line.
+
+require('piega').unfold_all()                              *piega.unfold_all()*
+    Unfold all folds in the current buffer.
+
+require('piega').fold_level()                              *piega.fold_level()*
+    Fold all nodes at the same level as the current line.
+
+require('piega').is_initialized()                     *piega.is_initialized()*
+    Check if the plugin has been initialized.
+
+    Returns: ~
+        (boolean)  true if initialized, false otherwise
+
+require('piega').get_config()                              *piega.get_config()*
+    Get the current plugin configuration.
+
+    Returns: ~
+        (table)  The current configuration
+
+require('piega').update_config({opts})                *piega.update_config()*
+    Update the plugin configuration at runtime.
+
+    Parameters: ~
+        {opts}  (table)  Configuration options to update
+
+==============================================================================
+8. FEATURES                                                    *piega-features*
+
+Fold Current Scope~
+    Press <leader>zf (default) to fold or unfold the scope containing the
+    cursor. Piega uses Treesitter to intelligently detect the scope
+    boundaries, whether it's a function, class, conditional block, or other
+    language construct.
+
+Unfold All~
+    Press <leader>zu (default) to unfold all folds in the current buffer.
+    Useful when you want to see all the code at once.
+
+Fold Same Level~
+    Press <leader>zl (default) to fold all nodes at the same level as the
+    current line. This is particularly useful for:
+    - Folding all methods in a class when cursor is on a method
+    - Folding all functions in a module
+    - Folding all if statements at the same nesting level
+
+Treesitter Integration~
+    Piega leverages Treesitter's AST to accurately determine code structure
+    and scope boundaries. This provides language-aware folding that
+    understands your code's semantics, not just indentation.
+
+==============================================================================
+9. TROUBLESHOOTING                                      *piega-troubleshooting*
+
+"nvim-treesitter is not installed" error~
+    Install nvim-treesitter: >lua
+        -- Using lazy.nvim
+        { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' }
+<
+
+"No Treesitter parser for filetype" warning~
+    Install the parser for your language: >vim
+        :TSInstall <language>
+<
+    For example: `:TSInstall python`, `:TSInstall lua`, etc.
+
+"No foldable scope found at cursor" warning~
+    Your cursor might be in a location without a recognizable scope (e.g.,
+    at the top level of a file). Try moving the cursor inside a function,
+    class, or other code block.
+
+    You can also extend the foldable nodes for your language in the config.
+
+Folds not persisting~
+    Piega uses manual folds by default. If you want folds to persist across
+    sessions, you can use a plugin like `remember.nvim` or add this to your
+    config: >vim
+        set viewoptions=folds,cursor
+        autocmd BufWinLeave *.* mkview
+        autocmd BufWinEnter *.* silent! loadview
+<
+
+==============================================================================
+10. LICENSE                                                    *piega-license*
+
+MIT License
+
+Copyright (c) 2024 Piega Contributors
+
+vim:tw=78:ts=8:ft=help:norl:
