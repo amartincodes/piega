@@ -73,7 +73,6 @@ end
 
 -- Toggle fold at cursor position
 function M.toggle_fold_at_cursor()
-  local line = vim.fn.line(".")
   local success = pcall(function()
     vim.cmd("normal! za")
   end)
