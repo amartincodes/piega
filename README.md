@@ -296,15 +296,44 @@ require('piega').prev_fold()    -- Jump to previous fold
 
 Piega works with any language that has a Treesitter parser. Out of the box, it includes foldable node configurations for:
 
-- Lua
-- Python
-- JavaScript/TypeScript
+**Systems & Compiled Languages:**
+- C/C++
 - Rust
 - Go
-- C/C++
 - Java
 
-You can easily add support for more languages by extending the `foldable_nodes` configuration.
+**Scripting Languages:**
+- Lua
+- Python
+- Bash/Shell
+
+**Web Development:**
+- JavaScript/TypeScript
+- JSX/TSX (React)
+- HTML
+- CSS
+
+**Data & Configuration:**
+- JSON/JSONC
+- YAML
+- Markdown
+
+You can easily add support for more languages by extending the `foldable_nodes` configuration. See [lua/piega/config.lua](lua/piega/config.lua) for examples, or add custom languages in your setup:
+
+```lua
+require('piega').setup({
+  foldable_nodes = {
+    ruby = {
+      "method_definition",
+      "class_definition",
+      "module_definition",
+      "if_statement",
+      "for_statement",
+      "while_statement",
+    },
+  },
+})
+```
 
 ## Troubleshooting
 
