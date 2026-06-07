@@ -1,8 +1,8 @@
 local M = {}
 local config = require("piega.config")
 
--- Check if nvim-treesitter is available
-local has_treesitter, ts_utils = pcall(require, "nvim-treesitter.ts_utils")
+-- Check if runtime Treesitter API is available
+local has_treesitter = vim.treesitter and type(vim.treesitter.get_parser) == "function"
 local has_parsers, parsers = pcall(require, "nvim-treesitter.parsers")
 
 -- Notify error helper
@@ -17,7 +17,7 @@ end
 
 -- Check if Treesitter is available
 function M.is_available()
-  return has_treesitter and has_parsers
+  return has_treesitter
 end
 
 -- Check if current buffer has a parser
@@ -26,13 +26,24 @@ function M.has_parser()
     return false
   end
 
-  return parsers.has_parser()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ok = pcall(vim.treesitter.get_parser, bufnr)
+  if ok then
+    return true
+  end
+
+  if has_parsers and parsers.has_parser then
+    local filetype = vim.bo[bufnr].filetype
+    return parsers.has_parser(filetype)
+  end
+
+  return false
 end
 
 -- Get Treesitter node at cursor position
 function M.get_node_at_cursor()
   if not M.is_available() then
-    notify_error("nvim-treesitter is not installed")
+    notify_error("Treesitter runtime is not available")
     return nil
   end
 
@@ -46,13 +57,14 @@ function M.get_node_at_cursor()
   local cursor_range = { cursor[1] - 1, cursor[2] }
 
   local bufnr = vim.api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr)
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
 
-  if not parser then
+  if not ok or not parser then
     return nil
   end
 
-  local root = ts_utils.get_root_for_position(cursor_range[1], cursor_range[2], parser)
+  local trees = parser:parse()
+  local root = trees and trees[1] and trees[1]:root() or nil
 
   if not root then
     return nil
@@ -98,10 +110,11 @@ function M.get_scope_node(node)
 
   -- FIRST: Search for all foldable nodes on the current line
   local bufnr = vim.api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr)
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
 
-  if parser then
-    local root = ts_utils.get_root_for_position(cursor_line, 0, parser)
+  if ok and parser then
+    local trees = parser:parse()
+    local root = trees and trees[1] and trees[1]:root() or nil
     if root then
       local nodes_on_line = {}
 

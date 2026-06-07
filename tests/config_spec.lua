@@ -119,5 +119,18 @@ describe("piega.config", function()
       assert.is_true(vim.tbl_contains(nodes, "object"))
       assert.is_true(vim.tbl_contains(nodes, "array"))
     end)
+
+    it("should return nodes for odin filetype", function()
+      config.setup()
+      vim.bo.filetype = "odin"
+
+      local nodes = config.get_foldable_nodes()
+
+      assert.is_true(vim.tbl_contains(nodes, "procedure_declaration"))
+      assert.is_true(vim.tbl_contains(nodes, "struct_declaration"))
+      assert.is_true(vim.tbl_contains(nodes, "if_statement"))
+      assert.is_true(vim.tbl_contains(nodes, "for_statement"))
+      assert.is_true(vim.tbl_contains(nodes, "switch_statement"))
+    end)
   end)
 end)

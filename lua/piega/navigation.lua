@@ -100,14 +100,10 @@ function M.next_foldable_scope()
 
   local current_line = vim.fn.line(".")
   local bufnr = vim.api.nvim_get_current_buf()
-  local total_lines = vim.fn.line("$")
 
   -- Get all foldable nodes in the buffer
-  local parsers = require("nvim-treesitter.parsers")
-  local ts_utils = require("nvim-treesitter.ts_utils")
-
-  local parser = parsers.get_parser(bufnr)
-  if not parser then
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  if not ok or not parser then
     M.next_fold()
     return
   end
@@ -129,12 +125,10 @@ function M.next_foldable_scope()
   end
 
   -- Parse and find foldable nodes
-  for i = 0, total_lines - 1 do
-    local root = ts_utils.get_root_for_position(i, 0, parser)
-    if root then
-      find_foldable_nodes(root)
-      break -- Only need to do this once for the whole buffer
-    end
+  local trees = parser:parse()
+  local root = trees and trees[1] and trees[1]:root() or nil
+  if root then
+    find_foldable_nodes(root)
   end
 
   -- Remove duplicates and sort
@@ -182,14 +176,10 @@ function M.prev_foldable_scope()
 
   local current_line = vim.fn.line(".")
   local bufnr = vim.api.nvim_get_current_buf()
-  local total_lines = vim.fn.line("$")
 
   -- Get all foldable nodes in the buffer
-  local parsers = require("nvim-treesitter.parsers")
-  local ts_utils = require("nvim-treesitter.ts_utils")
-
-  local parser = parsers.get_parser(bufnr)
-  if not parser then
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  if not ok or not parser then
     M.prev_fold()
     return
   end
@@ -211,12 +201,10 @@ function M.prev_foldable_scope()
   end
 
   -- Parse and find foldable nodes
-  for i = 0, total_lines - 1 do
-    local root = ts_utils.get_root_for_position(i, 0, parser)
-    if root then
-      find_foldable_nodes(root)
-      break
-    end
+  local trees = parser:parse()
+  local root = trees and trees[1] and trees[1]:root() or nil
+  if root then
+    find_foldable_nodes(root)
   end
 
   -- Remove duplicates and sort

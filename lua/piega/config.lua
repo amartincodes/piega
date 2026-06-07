@@ -168,6 +168,15 @@ M.defaults = {
 			"while_statement",
 			"command",
 		},
+		odin = {
+			"procedure_declaration",
+			"struct_declaration",
+			"enum_declaration",
+			"union_declaration",
+			"if_statement",
+			"for_statement",
+			"switch_statement",
+		},
 	},
 }
 
